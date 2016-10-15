@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./data/postgres:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: postgres_dev
+      POSTGRES_PASSWORD: postgres_dev
+
+  fluentd:
+    build: fluentd/image
+    ports:
+      - '9880:9880'
+    volumes:
+      - ./fluentd/etc:/fluentd/etc:ro
+      - ./data/fluentd/log:/fluentd/log
+    links:
+      - postgres
+      - mosquitto
+
+  mosquitto:
+    image: jllopis/mosquitto:v1.4.10
+    ports:
+      - '1883:1883'
